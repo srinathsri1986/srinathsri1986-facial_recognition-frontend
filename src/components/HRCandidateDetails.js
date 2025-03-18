@@ -43,6 +43,15 @@ const HRCandidateDetails = () => {
     fetchMeetings();
   }, [candidateId]);
 
+  // ✅ Open the document in a new tab for viewing
+  const openFile = (fileUrl) => {
+    if (fileUrl) {
+      window.open(fileUrl, "_blank", "noopener,noreferrer"); // ✅ Opens in a new tab
+    } else {
+      alert("File not found or invalid.");
+    }
+  };
+
   return (
     <div className="dashboard-container">
       {/* Sidebar for Meetings */}
@@ -98,8 +107,13 @@ const HRCandidateDetails = () => {
                   🆔 View ID Proof
                 </a>
               )}
+
               {candidate.resume && (
-                <p><a href={candidate.resume} download target="_blank">📄 Download Resume</a></p>
+                <p>
+                  <button className="resume-button" onClick={() => openFile(candidate.resume)}>
+                    📄 View Resume
+                  </button>
+                </p>
               )}
             </div>
 
