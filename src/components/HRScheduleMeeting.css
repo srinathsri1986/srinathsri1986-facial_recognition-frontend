@@ -1,0 +1,31 @@
+.schedule-tray {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 350px;
+  background: white;
+  padding: 20px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  text-align: center;
+}
+.schedule-tray h2 {
+  color: blue;
+  margin-bottom: 15px;
+}
+.schedule-tray input {
+  width: 90%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+.schedule-tray button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 5px;
+}
+.schedule-tray .close-btn {
+  background: red;
+  color: white;
+}
