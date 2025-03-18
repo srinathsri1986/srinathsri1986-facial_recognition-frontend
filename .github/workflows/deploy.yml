@@ -1,0 +1,26 @@
+name: Deploy Frontend to OCI
+
+on:
+  push:
+    branches:
+      - main  # Deploy only when main branch is updated
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to OCI Instance
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: 141.148.195.149
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/html/facial_recognition/frontend
+            git pull origin main
+            npm install  # Install frontend dependencies
+            npm run build  # Build frontend (optional)
+            sudo systemctl restart apache2  # Restart Apache (Change to nginx if using Nginx)
