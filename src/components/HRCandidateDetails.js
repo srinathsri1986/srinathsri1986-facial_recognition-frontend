@@ -44,13 +44,18 @@ const HRCandidateDetails = () => {
   }, [candidateId]);
 
   // ✅ Open the document in a new tab for viewing
-  const openFile = (fileUrl) => {
-    if (fileUrl) {
-      window.open(fileUrl, "_blank", "noopener,noreferrer"); // ✅ Opens in a new tab
-    } else {
-      alert("File not found or invalid.");
-    }
-  };
+  const handleFileDownload = (fileUrl) => {
+  if (fileUrl) {
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.setAttribute("download", ""); // ✅ Forces download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } else {
+    alert("File not found or invalid.");
+  }
+};
 
   return (
     <div className="dashboard-container">
@@ -110,8 +115,8 @@ const HRCandidateDetails = () => {
 
               {candidate.resume && (
                 <p>
-                  <button className="resume-button" onClick={() => openFile(candidate.resume)}>
-                    📄 View Resume
+                  <button className="resume-button" onClick={() => handleFileDownload(candidate.resume)}>
+                    📄 Download Resume
                   </button>
                 </p>
               )}
