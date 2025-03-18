@@ -5,7 +5,6 @@ import HRUploadVideo from "./HRUploadVideo"; // ✅ Import Video Upload Componen
 import "./HRCandidateDetails.css";
 
 const API_BASE_URL = "http://141.148.219.190:8000"; // ✅ Ensure API URL is correct
-const OCI_STORAGE_URL = "https://objectstorage.ap-mumbai-1.oraclecloud.com/n/bm5jx0spql58/b/facerec-uploads/o/";
 
 const HRCandidateDetails = () => {
   const { candidateId } = useParams();
@@ -13,14 +12,6 @@ const HRCandidateDetails = () => {
   const [meetings, setMeetings] = useState([]);
   const [showSchedule, setShowSchedule] = useState(false);
   const [showUploadVideo, setShowUploadVideo] = useState(false);
-  const [resumeFile, setResumeFile] = useState("");
-
-  // ✅ Function to Generate OCI Storage URLs
-  const fixURL = (filePath, category) => {
-    if (!filePath) return null;
-    if (filePath.startsWith("http")) return filePath; // Already correct
-    return `${OCI_STORAGE_URL}${category}/${filePath}`;
-  };
 
   useEffect(() => {
     const fetchCandidate = async () => {
@@ -29,10 +20,6 @@ const HRCandidateDetails = () => {
         if (!response.ok) throw new Error("Candidate not found");
         const data = await response.json();
         setCandidate(data.data);
-
-        if (data.data.resume) {
-          setResumeFile(fixURL(`${data.data.email}_resume.pdf`, "resume"));
-        }
       } catch (error) {
         console.error("❌ Error fetching candidate details:", error);
       }
@@ -87,11 +74,12 @@ const HRCandidateDetails = () => {
             <div className="profile-section">
               {candidate.photo ? (
                 <img 
-                  src={fixURL(`${candidate.email}_photo.jpg`, "photo")} 
+                  src={candidate.photo}  // ✅ Directly using API URL
                   alt="Candidate" 
                   className="candidate-photo"
                   onError={(e) => {
-                    e.target.src = "/default-profile.png"; // Set a default image if not found
+                    console.error("❌ Image Load Failed:", e.target.src); // 🔥 Debugging Log
+                    e.target.src = "/default-profile.png"; // ✅ Fallback Image
                   }}
                 />
               ) : (
@@ -106,12 +94,12 @@ const HRCandidateDetails = () => {
             <div className="documents-section">
               <h3>📁 Documents</h3>
               {candidate.id_proof && (
-                <a href={fixURL(`${candidate.email}_id.jpg`, "id_proof")} target="_blank" rel="noopener noreferrer">
+                <a href={candidate.id_proof} target="_blank" rel="noopener noreferrer">
                   🆔 View ID Proof
                 </a>
               )}
-              {resumeFile && (
-                <p><a href={resumeFile} download target="_blank">📄 Download Resume</a></p>
+              {candidate.resume && (
+                <p><a href={candidate.resume} download target="_blank">📄 Download Resume</a></p>
               )}
             </div>
 
