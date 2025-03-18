@@ -43,19 +43,29 @@ const HRCandidateDetails = () => {
     fetchMeetings();
   }, [candidateId]);
 
-  // ✅ Open the document in a new tab for viewing
   const handleFileDownload = (fileUrl) => {
   if (fileUrl) {
     const link = document.createElement("a");
     link.href = fileUrl;
-    link.setAttribute("download", ""); // ✅ Forces download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    link.setAttribute("target", "_blank");
+
+    // 🔹 Extract file extension
+    const fileExtension = fileUrl.split(".").pop().toLowerCase();
+    
+    // 🔥 Ensure `.pdf` opens in a new tab and `.doc` downloads
+    if (fileExtension === "pdf") {
+      window.open(fileUrl, "_blank");
+    } else {
+      link.setAttribute("download", fileUrl.split("/").pop()); // Force Download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   } else {
     alert("File not found or invalid.");
   }
 };
+
 
   return (
     <div className="dashboard-container">
@@ -116,7 +126,7 @@ const HRCandidateDetails = () => {
               {candidate.resume && (
                 <p>
                   <button className="resume-button" onClick={() => handleFileDownload(candidate.resume)}>
-                    📄 Download Resume
+                    📄 View/Download Resume
                   </button>
                 </p>
               )}
