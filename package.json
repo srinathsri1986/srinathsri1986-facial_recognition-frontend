@@ -14,8 +14,6 @@
     "react-scripts": "^5.0.1",
     "react-webcam": "^7.2.0",
     "resolve-url-loader": "^5.0.0",
-    "webpack": "^5.97.1",
-    "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.0"
   },
   "scripts": {
@@ -37,6 +35,8 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^4.10.0"
   }
 }
