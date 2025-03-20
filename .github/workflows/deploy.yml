@@ -1,4 +1,4 @@
-name: Deploy Frontend to OCI
+name: Deploy to Server
 
 on:
   push:
@@ -10,33 +10,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-      - name: Deploy via SSH with Password
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          script: |
-            # Ensure correct working directory
-            mkdir -p /var/www/html/facial_recognition/frontend
-            cd /var/www/html/facial_recognition/frontend
-            
-            # Handle untracked file conflicts
-            git stash --include-untracked
-            git pull origin main
-            git stash pop || true
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        script: |
+          # Fix permissions
+          sudo mkdir -p /var/www/html/facial_recognition/frontend
+          sudo chown -R $USER:$USER /var/www/html/facial_recognition
 
-            # Ensure Node.js, npm, and PM2 are installed
-            if ! command -v node &> /dev/null; then
-              sudo apt update && sudo apt install -y nodejs npm
-            fi
-            if ! command -v pm2 &> /dev/null; then
-              npm install -g pm2
-            fi
+          # Fix untracked git issues
+          cd /var/www/html/facial_recognition/frontend
+          git reset --hard
+          git clean -fd
+          git pull origin main
 
-            # Install dependencies & restart app
-            npm install
-            pm2 restart frontend || pm2 start npm --name "frontend" -- start
+          # Update Node.js
+          sudo apt update
+          sudo apt install -y nodejs npm
+          sudo npm cache clean -f
+          sudo npm install -g n
+          sudo n stable
+
+          # Fix npm permissions
+          mkdir -p ~/.npm-global
+          npm config set prefix '~/.npm-global'
+          export PATH=~/.npm-global/bin:$PATH
+          echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.profile
+          source ~/.profile
+
+          # Install dependencies & restart app
+          npm install
+          npm install -g pm2
+          pm2 restart frontend || pm2 start npm --name "frontend" -- start
