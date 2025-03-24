@@ -11,15 +11,15 @@ const HRDashboard = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // ✅ Check Authentication Before Accessing Dashboard
+  // ✅ Check Authentication
   useEffect(() => {
     const hrEmail = localStorage.getItem("hr_email");
     if (!hrEmail) {
-      navigate("/hr-login"); // Redirect to login if not authenticated
+      navigate("/hr-login");
     }
   }, [navigate]);
 
-  // ✅ Fetch Candidates (with Match Data) & Meetings
+  // ✅ Fetch Candidates and Meetings
   const fetchData = async () => {
     try {
       const [candidatesRes, meetingsRes] = await Promise.all([
@@ -34,10 +34,7 @@ const HRDashboard = () => {
       const candidatesData = await candidatesRes.json();
       const meetingsData = await meetingsRes.json();
 
-      // ✅ Get Current Date & Time
       const now = new Date();
-
-      // ✅ Filter Only Future Meetings
       const upcomingMeetings = (meetingsData.data || [])
         .filter((meeting) => new Date(meeting.scheduled_at) >= now)
         .map((meeting) => ({
@@ -59,28 +56,21 @@ const HRDashboard = () => {
     fetchData();
   }, []);
 
-  // ✅ Format Date for Meetings
   const formatMeetingTime = (dateString) => {
     if (!dateString) return "Unknown Time";
-
     try {
       const parsedDate = new Date(dateString);
       if (isNaN(parsedDate)) return "Invalid Date";
-
       return new Intl.DateTimeFormat("en-US", {
         dateStyle: "medium",
         timeStyle: "short",
       }).format(parsedDate);
-    } catch (error) {
-      console.error("❌ Date Formatting Error:", error);
+    } catch {
       return "Invalid Date";
     }
   };
 
-  // ✅ Loading State
   if (loading) return <p>Loading HR Dashboard...</p>;
-
-  // ✅ Error State
   if (error) return <p className="error-message">{error}</p>;
 
   return (
@@ -91,12 +81,8 @@ const HRDashboard = () => {
           <ul>
             {meetings.map((meeting, index) => (
               <li key={index} className="meeting-item">
-                <p>
-                  <strong>{meeting.candidate_name || "Unknown Candidate"}</strong>
-                </p>
+                <p><strong>{meeting.candidate_name}</strong></p>
                 <p>🕒 {formatMeetingTime(meeting.scheduled_at)}</p>
-
-                {/* ✅ Join Meeting */}
                 <a
                   href={meeting.join_url}
                   target="_blank"
@@ -142,50 +128,58 @@ const HRDashboard = () => {
                     </button>
                   </td>
                   <td>{candidate.email}</td>
-
-                  {/* ✅ HR Verification Status */}
                   <td className={candidate.verified ? "verified" : "unverified"}>
                     {candidate.verified ? "✅ Verified" : "❌ Not Verified"}
                   </td>
-
-                  {/* ✅ Face Match Status */}
                   <td className={candidate.match_found ? "matched" : "not-matched"}>
                     {candidate.match_found ? "✅ Matched" : "❌ Not Matched"}
                   </td>
-
-                  {/* ✅ Confidence Score */}
                   <td>
-                    {candidate.confidence_score !== undefined &&
-                    candidate.confidence_score !== null
+                    {candidate.confidence_score !== undefined && candidate.confidence_score !== null
                       ? candidate.confidence_score.toFixed(2)
                       : "0.00"}
                   </td>
-
-                  {/* ✅ Action Buttons */}
                   <td>
-                    {candidate.photo ? (
-                      <a href={candidate.photo} target="_blank" rel="noopener noreferrer">
-                        📷 View Photo
-                      </a>
-                    ) : (
-                      <span className="disabled">📷 No Photo</span>
-                    )}
+                    {/* 📷 Photo */}
+                    <div>
+                      {candidate.photo ? (
+                        <a href={candidate.photo} target="_blank" rel="noopener noreferrer">
+                          📷 View Photo
+                        </a>
+                      ) : (
+                        <span className="disabled">📷 No Photo</span>
+                      )}
+                    </div>
 
-                    {candidate.resume ? (
-                      <a href={candidate.resume} target="_blank" rel="noopener noreferrer">
-                        📄 View Resume
-                      </a>
-                    ) : (
-                      <span className="disabled">📄 No Resume</span>
-                    )}
+                    {/* 📄 Resume */}
+                    <div>
+                      {candidate.resume ? (() => {
+                        const resumeExt = candidate.resume.split(".").pop().toLowerCase();
+                        const isDownload = ["doc", "docx", "txt", "rtf"].includes(resumeExt);
+                        return isDownload ? (
+                          <a href={candidate.resume} download rel="noopener noreferrer">
+                            📄 Download Resume
+                          </a>
+                        ) : (
+                          <a href={candidate.resume} target="_blank" rel="noopener noreferrer">
+                            📄 View Resume
+                          </a>
+                        );
+                      })() : (
+                        <span className="disabled">📄 No Resume</span>
+                      )}
+                    </div>
 
-                    {candidate.id_proof ? (
-                      <a href={candidate.id_proof} target="_blank" rel="noopener noreferrer">
-                        🆔 View ID Proof
-                      </a>
-                    ) : (
-                      <span className="disabled">🆔 No ID Proof</span>
-                    )}
+                    {/* 🆔 ID Proof */}
+                    <div>
+                      {candidate.id_proof ? (
+                        <a href={candidate.id_proof} target="_blank" rel="noopener noreferrer">
+                          🆔 View ID Proof
+                        </a>
+                      ) : (
+                        <span className="disabled">🆔 No ID Proof</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
