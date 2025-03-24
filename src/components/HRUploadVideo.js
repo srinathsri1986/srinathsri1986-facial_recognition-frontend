@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 
 const API_BASE_URL = "http://141.148.219.190:8000";
-const OCI_PAR_URL =
-  "https://objectstorage.ap-mumbai-1.oraclecloud.com/p/nOwS_-FJUZTtO__6PjAi7T7FyD6MNvkmUIs55IGsYbaSH6wTjIj6Y7UoZM6iKOgp/n/bm5jx0spql58/b/facerec-uploads/o/video/";
+// ✅ PAR URL Constants
+const OCI_PAR_TOKEN = "YOUR_OCI_PAR_TOKEN";
+const OCI_NAMESPACE = "YOUR_OCI_NAMESPACE";
+const OCI_BUCKET_NAME = "YOUR_OCI_BUCKET_NAME";
+const BASE_PAR_URL = `https://${OCI_NAMESPACE}.objectstorage.ap-mumbai-1.oci.customer-oci.com/p/${OCI_PAR_TOKEN}/n/${OCI_NAMESPACE}/b/${OCI_BUCKET_NAME}/o/`;
+const OCI_PAR_URL = BASE_PAR_URL + "video/";
 
 const HRUploadVideo = ({ candidateId, onClose }) => {
   const [videoFile, setVideoFile] = useState(null);
