@@ -2,9 +2,9 @@ import React, { useState } from "react";
 
 const API_BASE_URL = "http://141.148.219.190:8000";
 // ✅ PAR URL Constants
-const OCI_PAR_TOKEN = "YOUR_OCI_PAR_TOKEN";
-const OCI_NAMESPACE = "YOUR_OCI_NAMESPACE";
-const OCI_BUCKET_NAME = "YOUR_OCI_BUCKET_NAME";
+const OCI_PAR_TOKEN = "KlvNhT0KOfX5pjeFJaSs5VPTdiEjcCmjAdZ93FopD-8ZEM5LZivVaGEWI6N9i7o9";
+const OCI_NAMESPACE = "bm5jx0spql58";
+const OCI_BUCKET_NAME = "facerec-uploads";
 const BASE_PAR_URL = `https://${OCI_NAMESPACE}.objectstorage.ap-mumbai-1.oci.customer-oci.com/p/${OCI_PAR_TOKEN}/n/${OCI_NAMESPACE}/b/${OCI_BUCKET_NAME}/o/`;
 const OCI_PAR_URL = BASE_PAR_URL + "video/";
 
