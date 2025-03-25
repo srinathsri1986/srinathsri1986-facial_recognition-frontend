@@ -166,7 +166,7 @@ const CandidateDashboard = () => {
                             ✕
                         </button>
 
-                        <CandidateDetails onDetailsUpdated={handleCloseEdit} />
+                        <CandidateDetails onDetailsUpdated={handleCloseEdit} onClose={handleCloseEdit} />
 
                         <button
                             onClick={handleCloseEdit}
