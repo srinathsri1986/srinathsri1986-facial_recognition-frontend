@@ -17,8 +17,8 @@ const CandidateProtectedRoute = ({ children }) => {
   return candidateEmail ? children : <Navigate to="/candidate-login" />;
 };
 
-// ✅ HR Protected Route (Same as Before)
-const ProtectedRoute = ({ children }) => {
+// ✅ HR Protected Route
+const HRProtectedRoute = ({ children }) => {
   const hrEmail = localStorage.getItem("hr_email");
   return hrEmail ? children : <Navigate to="/hr-login" />;
 };
@@ -27,20 +27,38 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* ✅ Candidate Routes (Now Protected) */}
-        <Route path="/candidate-login" element={<CandidateLogin />} />
+        {/* ✅ Candidate Routes */}
         <Route path="/candidate-signup" element={<CandidateSignup />} />
-        <Route path="/candidate-dashboard" element={<CandidateProtectedRoute><CandidateDashboard /></CandidateProtectedRoute>} />
-        <Route path="/candidate-details" element={<CandidateProtectedRoute><CandidateDetails /></CandidateProtectedRoute>} />
+        <Route path="/candidate-login" element={<CandidateLogin />} />
+        <Route
+          path="/candidate-dashboard"
+          element={<CandidateProtectedRoute><CandidateDashboard /></CandidateProtectedRoute>}
+        />
+        <Route
+          path="/candidate-details"
+          element={<CandidateProtectedRoute><CandidateDetails /></CandidateProtectedRoute>}
+        />
 
-        {/* ✅ HR Routes (Protected) */}
+        {/* ✅ HR Routes */}
         <Route path="/hr-login" element={<HRLogin />} />
-        <Route path="/hr-dashboard" element={<ProtectedRoute><HRDashboard /></ProtectedRoute>} />
-        <Route path="/hr/candidate/:candidateId" element={<ProtectedRoute><HRCandidateDetails /></ProtectedRoute>} />
-        <Route path="/hr/upload-video/:candidateId" element={<ProtectedRoute><HRUploadVideo /></ProtectedRoute>} />
-        <Route path="/hr/schedule-meeting/:candidateId" element={<ProtectedRoute><HRScheduleMeeting /></ProtectedRoute>} />
+        <Route
+          path="/hr-dashboard"
+          element={<HRProtectedRoute><HRDashboard /></HRProtectedRoute>}
+        />
+        <Route
+          path="/hr/candidate/:candidateId"
+          element={<HRProtectedRoute><HRCandidateDetails /></HRProtectedRoute>}
+        />
+        <Route
+          path="/hr/upload-video/:candidateId"
+          element={<HRProtectedRoute><HRUploadVideo /></HRProtectedRoute>}
+        />
+        <Route
+          path="/hr/schedule-meeting/:candidateId"
+          element={<HRProtectedRoute><HRScheduleMeeting /></HRProtectedRoute>}
+        />
 
-        {/* ✅ Default Route → Redirects to Candidate Login */}
+        {/* ✅ Fallback Route */}
         <Route path="*" element={<Navigate to="/candidate-login" />} />
       </Routes>
     </Router>
