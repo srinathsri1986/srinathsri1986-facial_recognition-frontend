@@ -1,5 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Toast styles
+
 import CandidateLogin from "./components/CandidateLogin";
 import CandidateSignup from "./components/CandidateSignup";
 import CandidateDashboard from "./components/CandidateDashboard";
@@ -61,6 +64,9 @@ function App() {
         {/* ✅ Fallback Route */}
         <Route path="*" element={<Navigate to="/candidate-login" />} />
       </Routes>
+
+      {/* ✅ Global Toast Container */}
+      <ToastContainer position="top-center" autoClose={3000} />
     </Router>
   );
 }
