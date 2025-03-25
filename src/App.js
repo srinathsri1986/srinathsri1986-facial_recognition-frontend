@@ -40,12 +40,8 @@ function App() {
         <Route path="/hr/upload-video/:candidateId" element={<ProtectedRoute><HRUploadVideo /></ProtectedRoute>} />
         <Route path="/hr/schedule-meeting/:candidateId" element={<ProtectedRoute><HRScheduleMeeting /></ProtectedRoute>} />
 
-        {/* ✅ Default Route → Redirects to the appropriate login page */}
-        <Route path="*" element={
-          sessionStorage.getItem("candidateEmail") ? <Navigate to="/candidate-dashboard" /> :
-          localStorage.getItem("hr_email") ? <Navigate to="/hr-dashboard" /> :
-          <Navigate to="/candidate-login" />
-        } />
+        {/* ✅ Default Route → Redirects to Candidate Login */}
+        <Route path="*" element={<Navigate to="/candidate-login" />} />
       </Routes>
     </Router>
   );
