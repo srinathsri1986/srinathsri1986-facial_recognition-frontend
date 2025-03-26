@@ -12,7 +12,9 @@ import HRDashboard from "./components/HRDashboard";
 import HRCandidateDetails from "./components/HRCandidateDetails";
 import HRUploadVideo from "./components/HRUploadVideo";
 import HRScheduleMeeting from "./components/HRScheduleMeeting";
-import HRCandidateAnalyticsDashboard from "./components/HRCandidateAnalyticsDashboard"; // ✅ ADDED
+import HRCandidateAnalyticsDashboard from "./components/HRCandidateAnalyticsDashboard";
+import HRHomeScreen from "./components/HRHomeScreen"; // ✅ Added HR Home
+
 import VideoCapture from "./components/VideoCapture";
 
 // ✅ Candidate Protected Route
@@ -36,34 +38,70 @@ function App() {
         <Route path="/candidate-login" element={<CandidateLogin />} />
         <Route
           path="/candidate-dashboard"
-          element={<CandidateProtectedRoute><CandidateDashboard /></CandidateProtectedRoute>}
+          element={
+            <CandidateProtectedRoute>
+              <CandidateDashboard />
+            </CandidateProtectedRoute>
+          }
         />
         <Route
           path="/candidate-details"
-          element={<CandidateProtectedRoute><CandidateDetails /></CandidateProtectedRoute>}
+          element={
+            <CandidateProtectedRoute>
+              <CandidateDetails />
+            </CandidateProtectedRoute>
+          }
         />
 
         {/* ✅ HR Routes */}
         <Route path="/hr-login" element={<HRLogin />} />
         <Route
           path="/hr-dashboard"
-          element={<HRProtectedRoute><HRDashboard /></HRProtectedRoute>}
+          element={
+            <HRProtectedRoute>
+              <HRDashboard />
+            </HRProtectedRoute>
+          }
+        />
+        <Route
+          path="/hr/home"
+          element={
+            <HRProtectedRoute>
+              <HRHomeScreen />
+            </HRProtectedRoute>
+          }
         />
         <Route
           path="/hr/candidate/:candidateId"
-          element={<HRProtectedRoute><HRCandidateDetails /></HRProtectedRoute>}
+          element={
+            <HRProtectedRoute>
+              <HRCandidateDetails />
+            </HRProtectedRoute>
+          }
         />
         <Route
           path="/hr/analytics"
-          element={<HRProtectedRoute><HRCandidateAnalyticsDashboard /></HRProtectedRoute>}
+          element={
+            <HRProtectedRoute>
+              <HRCandidateAnalyticsDashboard />
+            </HRProtectedRoute>
+          }
         />
         <Route
           path="/hr/upload-video/:candidateId"
-          element={<HRProtectedRoute><HRUploadVideo /></HRProtectedRoute>}
+          element={
+            <HRProtectedRoute>
+              <HRUploadVideo />
+            </HRProtectedRoute>
+          }
         />
         <Route
           path="/hr/schedule-meeting/:candidateId"
-          element={<HRProtectedRoute><HRScheduleMeeting /></HRProtectedRoute>}
+          element={
+            <HRProtectedRoute>
+              <HRScheduleMeeting />
+            </HRProtectedRoute>
+          }
         />
 
         {/* ✅ Fallback Route */}
