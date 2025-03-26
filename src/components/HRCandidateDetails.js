@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import HRScheduleMeeting from "./HRScheduleMeeting";
-import HRUploadVideo from "./HRUploadVideo"; // ✅ Import Video Upload Component
+import HRUploadVideo from "./HRUploadVideo";
 import "./HRCandidateDetails.css";
 
-const API_BASE_URL = "http://141.148.219.190:8000"; // ✅ Ensure API URL is correct
+const API_BASE_URL = "http://141.148.219.190:8000";
 
 const HRCandidateDetails = () => {
   const { candidateId } = useParams();
   const [candidate, setCandidate] = useState(null);
   const [meetings, setMeetings] = useState([]);
+  const [matchHistory, setMatchHistory] = useState([]);
   const [showSchedule, setShowSchedule] = useState(false);
   const [showUploadVideo, setShowUploadVideo] = useState(false);
 
@@ -30,8 +31,6 @@ const HRCandidateDetails = () => {
         const response = await fetch(`${API_BASE_URL}/api/hr/meetings`);
         if (!response.ok) throw new Error("Meetings not found");
         const data = await response.json();
-
-        // ✅ Filter meetings for the selected candidate
         const filteredMeetings = data.data?.filter(meeting => meeting.candidate_id === parseInt(candidateId)) || [];
         setMeetings(filteredMeetings);
       } catch (error) {
@@ -39,33 +38,41 @@ const HRCandidateDetails = () => {
       }
     };
 
+    const fetchMatchHistory = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/verification/match/${candidateId}`);
+        if (!response.ok) throw new Error("Match history not found");
+        const data = await response.json();
+        setMatchHistory(data.matches?.reverse() || []);
+      } catch (error) {
+        console.error("❌ Error fetching match history:", error);
+      }
+    };
+
     fetchCandidate();
     fetchMeetings();
+    fetchMatchHistory();
   }, [candidateId]);
 
   const handleFileDownload = (fileUrl) => {
-  if (fileUrl) {
-    const link = document.createElement("a");
-    link.href = fileUrl;
-    link.setAttribute("target", "_blank");
+    if (fileUrl) {
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.setAttribute("target", "_blank");
 
-    // 🔹 Extract file extension
-    const fileExtension = fileUrl.split(".").pop().toLowerCase();
-    
-    // 🔥 Ensure `.pdf` opens in a new tab and `.doc` downloads
-    if (fileExtension === "pdf") {
-      window.open(fileUrl, "_blank");
+      const fileExtension = fileUrl.split(".").pop().toLowerCase();
+      if (fileExtension === "pdf") {
+        window.open(fileUrl, "_blank");
+      } else {
+        link.setAttribute("download", fileUrl.split("/").pop());
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } else {
-      link.setAttribute("download", fileUrl.split("/").pop()); // Force Download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      alert("File not found or invalid.");
     }
-  } else {
-    alert("File not found or invalid.");
-  }
-};
-
+  };
 
   return (
     <div className="dashboard-container">
@@ -98,12 +105,12 @@ const HRCandidateDetails = () => {
             <div className="profile-section">
               {candidate.photo ? (
                 <img 
-                  src={candidate.photo}  // ✅ Directly using API URL
+                  src={candidate.photo}
                   alt="Candidate" 
                   className="candidate-photo"
                   onError={(e) => {
-                    console.error("❌ Image Load Failed:", e.target.src); // 🔥 Debugging Log
-                    e.target.src = "/default-profile.png"; // ✅ Fallback Image
+                    console.error("❌ Image Load Failed:", e.target.src);
+                    e.target.src = "/default-profile.png";
                   }}
                 />
               ) : (
@@ -122,7 +129,6 @@ const HRCandidateDetails = () => {
                   🆔 View ID Proof
                 </a>
               )}
-
               {candidate.resume && (
                 <p>
                   <button className="resume-button" onClick={() => handleFileDownload(candidate.resume)}>
@@ -132,7 +138,7 @@ const HRCandidateDetails = () => {
               )}
             </div>
 
-            {/* ✅ Upload Video Button */}
+            {/* Upload Video Button */}
             <button className="upload-video-btn" onClick={() => setShowUploadVideo(true)}>
               📹 Upload Verification Video
             </button>
@@ -140,7 +146,11 @@ const HRCandidateDetails = () => {
               <div className="modal">
                 <div className="modal-content">
                   <span className="close" onClick={() => setShowUploadVideo(false)}>❌</span>
-                  <HRUploadVideo candidateId={candidateId} onClose={() => setShowUploadVideo(false)} />
+                  <HRUploadVideo
+                    candidateId={candidateId}
+                    onClose={() => setShowUploadVideo(false)}
+                    candidatePhoto={candidate?.photo || ""}
+                  />
                 </div>
               </div>
             )}
@@ -157,6 +167,30 @@ const HRCandidateDetails = () => {
                 </div>
               </div>
             )}
+
+            {/* 🎯 Match History */}
+            <div className="match-history mt-6">
+              <h3 className="text-xl font-semibold mb-3">🧠 Face Match History</h3>
+              {matchHistory.length > 0 ? (
+                <ul className="match-history-list">
+                  {matchHistory.map((match, index) => (
+                    <li
+                      key={index}
+                      className={`match-item border-l-4 p-4 mb-3 rounded shadow-sm
+                        ${match.match_found ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"}`}
+                    >
+                      <p className="text-sm">📅 <strong>{new Date(match.created_at).toLocaleString()}</strong></p>
+                      <p>🆔 Match ID: {match.id}</p>
+                      <p>🎯 Confidence Score: <strong>{(match.confidence_score * 100).toFixed(2)}%</strong></p>
+                      <p>🖼️ Matching Frames: {match.matching_frames} / {match.checked_frames}</p>
+                      <p>🔗 Match Status: <span className="font-semibold">{match.status}</span></p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-600">No face match history available.</p>
+              )}
+            </div>
           </div>
         ) : (
           <p>Loading candidate details...</p>
