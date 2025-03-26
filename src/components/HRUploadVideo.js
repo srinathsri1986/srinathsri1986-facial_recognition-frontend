@@ -78,7 +78,7 @@ const HRUploadVideo = ({ candidateId, onClose, candidatePhoto }) => {
       formData.append("photo_path", candidatePhoto);
       formData.append("video_path", `${BASE_PAR_URL}video/${videoFilename}`);
 
-      const response = await fetch(`${API_BASE_URL}/match/`, {
+      const response = await fetch(`${API_BASE_URL}/api/verification/match/`, {
         method: "POST",
         body: formData,
       });
