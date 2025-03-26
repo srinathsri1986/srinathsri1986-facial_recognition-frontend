@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiLogOut, FiPieChart, FiGrid, FiMoon, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import {
+  FiLogOut,
+  FiPieChart,
+  FiGrid,
+  FiMoon,
+  FiChevronLeft,
+  FiChevronRight,
+} from "react-icons/fi";
 import "./HRHomeScreen.css";
 
 const OCI_PAR_TOKEN = "KlvNhT0KOfX5pjeFJaSs5VPTdiEjcCmjAdZ93FopD-8ZEM5LZivVaGEWI6N9i7o9";
@@ -39,13 +46,17 @@ const HRHomeScreen = () => {
 
           {/* Navigation */}
           <div className="flex flex-col space-y-4 mt-6 w-full items-center">
-            <div onClick={() => navigate("/hr-dashboard")} title="Dashboard" className={navItemClasses}>
+            <div
+              onClick={() => navigate("/hr-dashboard")}
+              title="Dashboard"
+              className={navItemClasses}
+            >
               <FiGrid size={24} />
               {!collapsed && <span>Dashboard</span>}
             </div>
 
             <div
-              onClick={() => navigate("/hr/candidate/5/analytics")}
+              onClick={() => navigate("/hr/analytics")}
               title="Analytics"
               className={navItemClasses}
             >
@@ -60,7 +71,10 @@ const HRHomeScreen = () => {
           <button onClick={() => setDarkMode(!darkMode)} title="Toggle Theme">
             <FiMoon size={22} />
           </button>
-          <button onClick={() => setCollapsed(!collapsed)} title="Collapse Sidebar">
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            title="Collapse Sidebar"
+          >
             {collapsed ? <FiChevronRight size={22} /> : <FiChevronLeft size={22} />}
           </button>
           <div onClick={handleLogout} title="Logout">
