@@ -1,23 +1,18 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import "react-toastify/dist/ReactToastify.css"; // Toast styles
 
-// Candidate components
 import CandidateLogin from "./components/CandidateLogin";
 import CandidateSignup from "./components/CandidateSignup";
 import CandidateDashboard from "./components/CandidateDashboard";
 import CandidateDetails from "./components/CandidateDetails";
-
-// HR components
 import HRLogin from "./components/HRLogin";
 import HRDashboard from "./components/HRDashboard";
 import HRCandidateDetails from "./components/HRCandidateDetails";
 import HRUploadVideo from "./components/HRUploadVideo";
 import HRScheduleMeeting from "./components/HRScheduleMeeting";
-import HRCandidateAnalyticsDashboard from "./components/HRCandidateAnalyticsDashboard";
-import HRHomeScreen from "./components/HRHomeScreen";
-
+import HRCandidateAnalyticsDashboard from "./components/HRCandidateAnalyticsDashboard"; // ✅ ADDED
 import VideoCapture from "./components/VideoCapture";
 
 // ✅ Candidate Protected Route
@@ -51,10 +46,6 @@ function App() {
         {/* ✅ HR Routes */}
         <Route path="/hr-login" element={<HRLogin />} />
         <Route
-          path="/hr/home"
-          element={<HRProtectedRoute><HRHomeScreen /></HRProtectedRoute>}
-        />
-        <Route
           path="/hr-dashboard"
           element={<HRProtectedRoute><HRDashboard /></HRProtectedRoute>}
         />
@@ -63,7 +54,7 @@ function App() {
           element={<HRProtectedRoute><HRCandidateDetails /></HRProtectedRoute>}
         />
         <Route
-          path="/hr/candidate/:candidateId/analytics"
+          path="/hr/analytics"
           element={<HRProtectedRoute><HRCandidateAnalyticsDashboard /></HRProtectedRoute>}
         />
         <Route
