@@ -28,10 +28,8 @@ const HRLogin = () => {
       // ✅ Store HR email in localStorage
       localStorage.setItem("hr_email", data.email);
 
-      // ✅ Ensure localStorage is updated before redirecting
-      setTimeout(() => {
-        navigate("/hr-dashboard");
-      }, 100);
+      // ✅ Redirect to HR Home Screen
+      navigate("/hr/home");
 
     } catch (err) {
       setError(err.message);
