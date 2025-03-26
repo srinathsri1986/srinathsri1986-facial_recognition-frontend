@@ -1,8 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const iconBaseUrl = "https://your-bucket-url/icons"; // 🔁 Replace with your bucket URL
-const logoUrl = "https://bm5jx0spql58.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm5jx0spql58/b/facerec-uploads/o/Icon%2Facl_logoACL-Logo-Black.webp";
+// ✅ OCI Bucket Constants
+const OCI_PAR_TOKEN = "KlvNhT0KOfX5pjeFJaSs5VPTdiEjcCmjAdZ93FopD-8ZEM5LZivVaGEWI6N9i7o9";
+const OCI_NAMESPACE = "bm5jx0spql58";
+const OCI_BUCKET_NAME = "facerec-uploads";
+
+const BASE_PAR_URL = `https://${OCI_NAMESPACE}.objectstorage.ap-mumbai-1.oci.customer-oci.com/p/${OCI_PAR_TOKEN}/n/${OCI_NAMESPACE}/b/${OCI_BUCKET_NAME}/o/`;
+const OCI_PAR_URL = BASE_PAR_URL + "video/";
+const iconBaseUrl = `${BASE_PAR_URL}Icon`; // ✅ Assuming icons are stored in /Icon folder
+const logoUrl = `${iconBaseUrl}/acl_logoACL-Logo-Black.webp`; // ✅ ACL logo in /Icon folder
 
 const HRHomeScreen = () => {
   const navigate = useNavigate();
