@@ -9,6 +9,8 @@ import {
   LineChart,
   Line,
 } from "recharts";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const API_BASE_URL = "http://141.148.219.190:8000";
 
@@ -21,6 +23,7 @@ const HRCandidateAnalyticsDashboard = () => {
   const [minConfidence, setMinConfidence] = useState("");
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ limit: 50, offset: 0 });
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchCandidates = async () => {
     try {
@@ -47,6 +50,7 @@ const HRCandidateAnalyticsDashboard = () => {
       const res = await fetch(`${API_BASE_URL}/api/verification/match/all?${params.toString()}`);
       const data = await res.json();
       setMatchHistory(data.matches || []);
+      setTotalCount(data.count || 0);
     } catch (err) {
       console.error("Error fetching match data:", err);
     } finally {
@@ -86,7 +90,6 @@ const HRCandidateAnalyticsDashboard = () => {
       match.status,
     ]);
     const csvContent = [header, ...rows].map((e) => e.join(",")).join("\n");
-
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -96,28 +99,60 @@ const HRCandidateAnalyticsDashboard = () => {
     document.body.removeChild(link);
   };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Candidate Match Analytics", 14, 16);
+    const tableData = matchHistory.map((match) => [
+      match.id,
+      `${match.candidate?.first_name || ""} ${match.candidate?.last_name || ""}`,
+      (match.confidence_score * 100).toFixed(2),
+      match.matching_frames,
+      match.checked_frames,
+      match.status,
+    ]);
+    autoTable(doc, {
+      startY: 20,
+      head: [["Match ID", "Candidate", "Confidence Score", "Matching Frames", "Checked Frames", "Status"]],
+      body: tableData,
+    });
+    doc.save("candidate_analytics.pdf");
+  };
+
   const handlePrev = () => {
     setPagination((prev) => ({ ...prev, offset: Math.max(prev.offset - prev.limit, 0) }));
   };
 
   const handleNext = () => {
-    setPagination((prev) => ({ ...prev, offset: prev.offset + prev.limit }));
+    if (pagination.offset + pagination.limit < totalCount) {
+      setPagination((prev) => ({ ...prev, offset: prev.offset + prev.limit }));
+    }
+  };
+
+  const resetFilters = () => {
+    setCandidateId("");
+    setStartDate("");
+    setEndDate("");
+    setMinConfidence("");
+    setPagination({ limit: 50, offset: 0 });
+    fetchMatchData();
   };
 
   return (
     <div className="p-6 space-y-6 min-h-screen bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold">📊 Match Analytics Dashboard</h2>
-        <button
-          onClick={exportToCSV}
-          className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-md"
-        >
-          ⬇️ Export CSV
-        </button>
+        <div className="space-x-2">
+          <button onClick={exportToCSV} className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-md">
+            ⬇️ CSV
+          </button>
+          <button onClick={exportToPDF} className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 shadow-md">
+            📄 PDF
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
         <div>
           <label className="block text-sm font-medium mb-1">Candidate</label>
           <select
@@ -164,11 +199,13 @@ const HRCandidateAnalyticsDashboard = () => {
           />
         </div>
         <div>
-          <button
-            onClick={fetchMatchData}
-            className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700"
-          >
-            🔍 Apply Filters
+          <button onClick={fetchMatchData} className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">
+            🔍 Apply
+          </button>
+        </div>
+        <div>
+          <button onClick={resetFilters} className="w-full bg-gray-400 text-white p-2 rounded hover:bg-gray-500">
+            ♻️ Reset
           </button>
         </div>
       </div>
@@ -219,7 +256,11 @@ const HRCandidateAnalyticsDashboard = () => {
         <button onClick={handlePrev} disabled={pagination.offset === 0} className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50">
           ⬅️ Previous
         </button>
-        <button onClick={handleNext} className="px-4 py-2 bg-blue-500 text-white rounded">
+        <button
+          onClick={handleNext}
+          disabled={pagination.offset + pagination.limit >= totalCount}
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+        >
           Next ➡️
         </button>
       </div>
