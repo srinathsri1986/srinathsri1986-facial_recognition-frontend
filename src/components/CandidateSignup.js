@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const CandidateSignup = () => {
   const [firstName, setFirstName] = useState("");
@@ -15,7 +17,7 @@ const CandidateSignup = () => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      toast.error("Passwords do not match!");
       return;
     }
 
@@ -38,18 +40,16 @@ const CandidateSignup = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(`Signup failed: ${data.detail || "Unknown error"}`);
+        toast.error(`Signup failed: ${data.detail || "Unknown error"}`);
         return;
       }
 
-      alert("Signup successful! Redirecting to login...");
-
-      // Clear any HR session just in case
+      toast.success("Signup successful! Redirecting to login...");
       localStorage.removeItem("hr_email");
       navigate("/candidate-login");
     } catch (error) {
       console.error("Signup Error:", error);
-      alert("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
