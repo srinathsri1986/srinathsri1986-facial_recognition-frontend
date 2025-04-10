@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
 import {
   CheckCircle,
   XCircle,
@@ -56,12 +53,7 @@ const FaceMatchHistory = ({ matchHistory, onSendMail, hrEmail }) => {
     <div className="mt-6">
       <div className="flex items-center mb-4">
         <UserCheck className="h-6 w-6 mr-2 text-indigo-500" />
-        <h3 className="text-xl font-semibold text-gray-800">
-          <span role="img" aria-label="brain">
-            🧠
-          </span>{' '}
-          Face Match History
-        </h3>
+        <h3 className="text-xl font-semibold text-gray-800">🧠 Face Match History</h3>
       </div>
 
       {matchHistory && matchHistory.length > 0 ? (
@@ -69,108 +61,82 @@ const FaceMatchHistory = ({ matchHistory, onSendMail, hrEmail }) => {
           {matchHistory.map((match, index) => (
             <li
               key={index}
-              className={cn(
-                'bg-white rounded-lg shadow-md border p-4 transition-all duration-300',
-                'hover:shadow-lg hover:border-gray-300',
+              className={`bg-white rounded-lg shadow-md border p-4 ${
                 match.match_found
                   ? 'border-green-500/50 bg-green-50/50'
                   : 'border-red-500/50 bg-red-50/50'
-              )}
+              }`}
             >
               <div className="flex justify-between items-start gap-4">
                 <div className="space-y-2 flex-grow">
                   <p className="text-sm text-gray-600">
-                    <span className="font-medium">Date/Time:</span>{' '}
-                    {formatDate(match.created_at)}
+                    <strong>Date/Time:</strong> {formatDate(match.created_at)}
                   </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Match ID:</span> {match.id}
+                  <p><strong>Match ID:</strong> {match.id}</p>
+                  <p className="text-blue-600">
+                    <strong>Confidence:</strong> {(match.confidence_score * 100).toFixed(2)}%
                   </p>
-                  <p className="text-blue-600 font-medium">
-                    <span className="font-medium">Confidence:</span>{' '}
-                    {(match.confidence_score * 100).toFixed(2)}%
+                  <p>
+                    <strong>Matching Frames:</strong> {match.matching_frames} / {match.checked_frames}
                   </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Matching Frames:</span>{' '}
-                    {match.matching_frames} / {match.checked_frames}
+                  <p>
+                    <strong>Candidate:</strong> {match.candidate.first_name} {match.candidate.last_name} ({match.candidate.email})
                   </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Candidate:</span>{' '}
-                    {match.candidate.first_name} {match.candidate.last_name} (
-                    {match.candidate.email})
-                  </p>
+
                   {match.candidate.photo && (
-                    <p className="text-gray-700">
-                      <span className="font-medium">Photo:</span>
-                      <a
-                        href={match.candidate.photo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:underline flex items-center"
-                      >
-                        <Image className="inline-block h-4 w-4 mr-1" /> View
-                        Photo
+                    <p>
+                      <strong>Photo:</strong>{' '}
+                      <a href={match.candidate.photo} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center">
+                        <Image className="inline-block h-4 w-4 mr-1" /> View Photo
                       </a>
                     </p>
                   )}
                   {match.candidate.resume && (
-                    <p className="text-gray-700">
-                      <span className="font-medium">Resume:</span>
-                      <a
-                        href={match.candidate.resume}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:underline flex items-center"
-                      >
-                        <File className="inline-block h-4 w-4 mr-1" /> View
-                        Resume
+                    <p>
+                      <strong>Resume:</strong>{' '}
+                      <a href={match.candidate.resume} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center">
+                        <File className="inline-block h-4 w-4 mr-1" /> View Resume
                       </a>
                     </p>
                   )}
                   {match.candidate.id_proof && (
-                    <p className="text-gray-700">
-                      <span className="font-medium">ID Proof:</span>
-                      <a
-                        href={match.candidate.id_proof}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:underline flex items-center"
-                      >
-                        <File className="inline-block h-4 w-4 mr-1" /> View ID
-                        Proof
+                    <p>
+                      <strong>ID Proof:</strong>{' '}
+                      <a href={match.candidate.id_proof} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center">
+                        <File className="inline-block h-4 w-4 mr-1" /> View ID Proof
                       </a>
                     </p>
                   )}
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <span
-                    className={cn(
-                      'px-3 py-1 rounded-full text-sm font-semibold',
+                    className={`px-3 py-1 rounded-full text-sm font-semibold flex items-center ${
                       match.match_found
                         ? 'bg-green-100/80 text-green-700'
                         : 'bg-red-100/80 text-red-700'
-                    )}
+                    }`}
                   >
                     {getStatusIcon(match.status, match.match_found)}
                     <span className="ml-1">{match.status}</span>
                   </span>
                 </div>
               </div>
+
+              {/* Comment box */}
               <div className="mt-4 pt-4 border-t border-gray-200">
-                <Textarea
+                <textarea
                   placeholder="HR Approver Comments..."
                   value={comments[match.id] || ''}
                   onChange={(e) => handleCommentChange(match.id, e.target.value)}
-                  className="text-sm"
+                  className="w-full p-2 text-sm border rounded"
                 />
                 <div className="flex justify-end mt-2">
-                  <Button
-                    size="sm"
+                  <button
                     onClick={() => handleSendComment(match.id, match.candidate.email)}
-                    className="bg-blue-500/20 text-blue-500 hover:bg-blue-500/30 hover:text-blue-400"
+                    className="bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm px-3 py-1 rounded flex items-center"
                   >
                     <MessageSquare className="mr-2 h-4 w-4" /> Submit Comment
-                  </Button>
+                  </button>
                 </div>
               </div>
             </li>
