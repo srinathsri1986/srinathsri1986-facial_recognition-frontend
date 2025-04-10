@@ -34,7 +34,7 @@ interface MatchWithCandidate extends Match {
 }
 
 const HRCandidateDetails = () => {
-  const { candidateId } = useParams<{ candidateId: string }>();
+  const { candidateId } = useParams<{ candidateId: string }>();  // Corrected line
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [meetings, setMeetings] = useState<any[]>([]);
   const [matchHistory, setMatchHistory] = useState<MatchWithCandidate[]>([]);
@@ -256,4 +256,3 @@ const HRCandidateDetails = () => {
 };
 
 export default HRCandidateDetails;
-
