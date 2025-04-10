@@ -3,16 +3,44 @@ import { useParams } from "react-router-dom";
 import HRScheduleMeeting from "./HRScheduleMeeting";
 import HRUploadVideo from "./HRUploadVideo";
 import "./HRCandidateDetails.css";
+import FaceMatchHistory from "./FaceMatchHistory"; // Import the FaceMatchHistory component
 
 const API_BASE_URL = "http://141.148.219.190:8000";
 
+interface Match {
+  id: string;
+  created_at: string;
+  confidence_score: number;
+  matching_frames: number;
+  checked_frames: number;
+  status: string;
+  match_found: boolean;
+  hr_comments?: string; // Optional HR comments
+}
+
+interface Candidate {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  verified: boolean;
+  photo: string | null;
+  resume: string | null;
+  id_proof: string | null;
+}
+
+interface MatchWithCandidate extends Match {
+  candidate: Candidate;
+}
+
 const HRCandidateDetails = () => {
-  const { candidateId } = useParams();
-  const [candidate, setCandidate] = useState(null);
-  const [meetings, setMeetings] = useState([]);
-  const [matchHistory, setMatchHistory] = useState([]);
+  const { candidateId } = useParams<{ candidateId: string }>();
+  const [candidate, setCandidate] = useState<Candidate | null>(null);
+  const [meetings, setMeetings] = useState<any[]>([]);
+  const [matchHistory, setMatchHistory] = useState<MatchWithCandidate[]>([]);
   const [showSchedule, setShowSchedule] = useState(false);
   const [showUploadVideo, setShowUploadVideo] = useState(false);
+  const [hrEmail, setHrEmail] = useState<string>("hr@example.com"); // Replace with your HR email.  Ideally, fetch this.
 
   useEffect(() => {
     const fetchCandidate = async () => {
@@ -31,7 +59,7 @@ const HRCandidateDetails = () => {
         const response = await fetch(`${API_BASE_URL}/api/hr/meetings`);
         if (!response.ok) throw new Error("Meetings not found");
         const data = await response.json();
-        const filteredMeetings = data.data?.filter(meeting => meeting.candidate_id === parseInt(candidateId)) || [];
+        const filteredMeetings = data.data?.filter((meeting: any) => meeting.candidate_id === parseInt(candidateId)) || [];
         setMeetings(filteredMeetings);
       } catch (error) {
         console.error("❌ Error fetching meetings:", error);
@@ -39,14 +67,43 @@ const HRCandidateDetails = () => {
     };
 
     const fetchMatchHistory = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/verification/match/${candidateId}`);
-        if (!response.ok) throw new Error("Match history not found");
-        const data = await response.json();
-        setMatchHistory(data.matches?.reverse() || []);
-      } catch (error) {
-        console.error("❌ Error fetching match history:", error);
-      }
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/verification/match/${candidateId}`);
+            if (!response.ok) {
+                throw new Error("Match history not found");
+            }
+            const data = await response.json();
+
+            // Assuming your API returns an array of match objects under the key "matches"
+            const matches: any[] = data.matches || [];
+
+            // Transform the data to the MatchWithCandidate interface
+            const transformedMatchHistory: MatchWithCandidate[] = matches.map((match: any) => ({
+                id: match.id,
+                created_at: match.created_at,
+                confidence_score: match.confidence_score,
+                matching_frames: match.matching_frames,
+                checked_frames: match.checked_frames,
+                status: match.status,
+                match_found: match.match_found,
+                hr_comments: match.hr_comments, // Keep any existing hr_comments
+                candidate: { //  Populate the candidate object.
+                    id: match.candidate.id,
+                    first_name: match.candidate.first_name,
+                    last_name: match.candidate.last_name,
+                    email: match.candidate.email,
+                    verified: match.candidate.verified,
+                    photo: match.candidate.photo,
+                    resume: match.candidate.resume,
+                    id_proof: match.candidate.id_proof,
+                },
+            }));
+            setMatchHistory(transformedMatchHistory.reverse()); // Reverse to show latest first
+
+        } catch (error: any) {
+            console.error("❌ Error fetching match history:", error);
+            setMatchHistory([]); // Set to empty array to avoid rendering errors
+        }
     };
 
     fetchCandidate();
@@ -54,17 +111,17 @@ const HRCandidateDetails = () => {
     fetchMatchHistory();
   }, [candidateId]);
 
-  const handleFileDownload = (fileUrl) => {
+  const handleFileDownload = (fileUrl: string | null) => {
     if (fileUrl) {
       const link = document.createElement("a");
       link.href = fileUrl;
       link.setAttribute("target", "_blank");
 
-      const fileExtension = fileUrl.split(".").pop().toLowerCase();
+      const fileExtension = fileUrl.split(".").pop()?.toLowerCase();
       if (fileExtension === "pdf") {
         window.open(fileUrl, "_blank");
       } else {
-        link.setAttribute("download", fileUrl.split("/").pop());
+        link.setAttribute("download", fileUrl.split("/").pop() || "downloaded_file");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -73,6 +130,13 @@ const HRCandidateDetails = () => {
       alert("File not found or invalid.");
     }
   };
+
+    const handleSendMailToHR = (recipientEmail: string, comment: string) => {
+        // Replace this with your actual email sending logic.  This is a placeholder.
+        console.log(`Sending email to ${recipientEmail} with comment: ${comment}`);
+        alert(`Email sent to ${recipientEmail} (simulated):\nComment: ${comment}`);
+        //  You would typically use a backend service or an email library (e.g., emailjs) here.
+    };
 
   return (
     <div className="dashboard-container">
@@ -83,7 +147,9 @@ const HRCandidateDetails = () => {
           <ul>
             {meetings.map((meeting, index) => (
               <li key={index} className="meeting-item">
-                <p><strong>{candidate?.first_name} {candidate?.last_name}</strong></p>
+                <p>
+                  <strong>{candidate?.first_name} {candidate?.last_name}</strong>
+                </p>
                 <p>🕒 {new Date(meeting.scheduled_at).toLocaleString()}</p>
                 <a href={meeting.join_url} target="_blank" rel="noopener noreferrer" className="join-meeting">
                   🔗 Join Meeting
@@ -97,27 +163,31 @@ const HRCandidateDetails = () => {
       </aside>
 
       {/* Candidate Details */}
-      <div className="content">
+      <main className="content">
         <h2>Candidate Details</h2>
         {candidate ? (
           <div className="candidate-details">
             {/* Profile Section */}
             <div className="profile-section">
               {candidate.photo ? (
-                <img 
+                <img
                   src={candidate.photo}
-                  alt="Candidate" 
+                  alt="Candidate"
                   className="candidate-photo"
                   onError={(e) => {
-                    console.error("❌ Image Load Failed:", e.target.src);
-                    e.target.src = "/default-profile.png";
+                    console.error("❌ Image Load Failed:", (e.target as HTMLImageElement).src);
+                    (e.target as HTMLImageElement).src = "/default-profile.png";
                   }}
                 />
               ) : (
-                <p className="text-gray-600">No photo available.</p>
+                <div className="candidate-photo">No Photo</div>
               )}
-              <h3>{candidate.first_name} {candidate.last_name}</h3>
-              <p>Email: <a href={`mailto:${candidate.email}`}>{candidate.email}</a></p>
+              <h3 className="mt-2 text-lg font-semibold">
+                {candidate.first_name} {candidate.last_name}
+              </h3>
+              <p>
+                Email: <a href={`mailto:${candidate.email}`}>{candidate.email}</a>
+              </p>
               <p>Verified: {candidate.verified ? "✅ Yes" : "❌ No"}</p>
             </div>
 
@@ -145,7 +215,9 @@ const HRCandidateDetails = () => {
             {showUploadVideo && (
               <div className="modal">
                 <div className="modal-content">
-                  <span className="close" onClick={() => setShowUploadVideo(false)}>❌</span>
+                  <span className="close" onClick={() => setShowUploadVideo(false)}>
+                    ❌
+                  </span>
                   <HRUploadVideo
                     candidateId={candidateId}
                     onClose={() => setShowUploadVideo(false)}
@@ -162,42 +234,26 @@ const HRCandidateDetails = () => {
             {showSchedule && (
               <div className="modal">
                 <div className="modal-content">
-                  <span className="close" onClick={() => setShowSchedule(false)}>❌</span>
+                  <span className="close" onClick={() => setShowSchedule(false)}>
+                    ❌
+                  </span>
                   <HRScheduleMeeting candidate={candidate} onClose={() => setShowSchedule(false)} />
                 </div>
               </div>
             )}
-
-            {/* 🎯 Match History */}
-            <div className="match-history mt-6">
-              <h3 className="text-xl font-semibold mb-3">🧠 Face Match History</h3>
-              {matchHistory.length > 0 ? (
-                <ul className="match-history-list">
-                  {matchHistory.map((match, index) => (
-                    <li
-                      key={index}
-                      className={`match-item border-l-4 p-4 mb-3 rounded shadow-sm
-                        ${match.match_found ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50"}`}
-                    >
-                      <p className="text-sm">📅 <strong>{new Date(match.created_at).toLocaleString()}</strong></p>
-                      <p>🆔 Match ID: {match.id}</p>
-                      <p>🎯 Confidence Score: <strong>{(match.confidence_score * 100).toFixed(2)}%</strong></p>
-                      <p>🖼️ Matching Frames: {match.matching_frames} / {match.checked_frames}</p>
-                      <p>🔗 Match Status: <span className="font-semibold">{match.status}</span></p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-600">No face match history available.</p>
-              )}
-            </div>
+            <FaceMatchHistory
+                matchHistory={matchHistory}
+                onSendMail={handleSendMailToHR}
+                hrEmail={hrEmail}
+            />
           </div>
         ) : (
           <p>Loading candidate details...</p>
         )}
-      </div>
+      </main>
     </div>
   );
 };
 
 export default HRCandidateDetails;
+
